@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BYTE_NEWS 8b - Portal Tecnológico</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ================= HEADER / BARRA DE NAVEGACIÓN ================= -->
+  <header class="header-retro">
+    <div class="logo">
+      <span class="pixel-box">■</span> BYTE_NEWS 8b
+    </div>
+
+    <!-- Menú de Navegación Principal -->
+    <nav class="nav-retro" id="navMenu">
+      <a href="#home" class="nav-link active" data-view="home">[INICIO]</a>
+      <a href="#catalogo" class="nav-link" data-view="catalogo">NOTICIAS</a>
+      <a href="#catalogo" class="nav-link" id="btnVerFavoritos">FAVORITOS (<span id="favCount">0</span>)</a>
+      <a href="#contacto" class="nav-link" data-view="contacto">CONTACTO</a>
+    </nav>
+
+    <!-- Controles de Cabecera: Switch Sol/Luna y Menú Móvil -->
+    <div class="header-controls">
+      <!-- Conmutador Deslizante de Tema Claro/Oscuro -->
+      <label class="theme-switch" title="Alternar tema claro/oscuro">
+        <input type="checkbox" id="themeToggle">
+        <span class="slider-pista">
+          <span class="icono-sol">☼</span>
+          <span class="icono-luna">☾</span>
+          <span class="selector-bloque"></span>
+        </span>
+      </label>
+
+      <!-- Botón Hamburguesa Móvil -->
+      <button class="btn-hamburguesa" id="btnHamburguesa" aria-label="Abrir menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= CONTENEDOR PRINCIPAL ================= -->
+  <main class="contenedor-principal">
+
+    <!-- SECCIÓN 1: VISTA HOME -->
+    <section id="vistaHome" class="vista-seccion active">
+      <!-- Hero Banner -->
+      <div class="hero-retro">
+        <h2>&gt;&gt; EL DIARIO DE LA ERA DIGITAL &lt;&lt;</h2>
+        <p>Hardware abierto, arquitectura de microchips, kernels y desarrollo de software explicados pixel a pixel.</p>
+        <button class="btn-retro btn-primario" id="btnExplorarHome">&gt; EXPLORAR NOTICIAS</button>
+      </div>
+
+      <!-- Noticias Destacadas -->
+      <div class="seccion-destacadas">
+        <h3 class="titulo-seccion">■ NOTICIAS DESTACADAS</h3>
+        <div class="grid-noticias" id="gridDestacadas">
+          <!-- Renderizado dinámico vía JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: CATÁLOGO Y GESTIÓN (MINI CRUD) -->
+    <section id="vistaCatalogo" class="vista-seccion">
+      <div class="barra-crud">
+        <div>
+          <h3 class="titulo-seccion">&gt; CATALOGO GENERAL DE PUBLICACIONES</h3>
+          <!-- Filtros de Categoría -->
+          <div class="filtros-categoria">
+            <button class="btn-filtro active" data-cat="todas">TODAS</button>
+            <button class="btn-filtro" data-cat="Hardware">HARDWARE</button>
+            <button class="btn-filtro" data-cat="Software">SOFTWARE</button>
+            <button class="btn-filtro" data-cat="Servidores">SERVIDORES</button>
+          </div>
+        </div>
+        <!-- Botón Mini CRUD: Crear Noticia -->
+        <button class="btn-retro btn-exito" id="btnAbrirModal">[+] CREAR NOTICIA</button>
+      </div>
+
+      <!-- Cuadrícula completa de Noticias -->
+      <div class="grid-noticias" id="gridCatalogo">
+        <!-- Renderizado dinámico vía JavaScript -->
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: VISTA DE DETALLE DE LA NOTICIA -->
+    <section id="vistaDetalle" class="vista-seccion">
+      <button class="btn-retro btn-secundario" id="btnVolverCatalogo">&lt;-- [ESC] VOLVER AL CATALOGO</button>
+      
+      <article class="articulo-detalle">
+        <h2 id="detalleTitulo" class="detalle-titular">Cargando noticia...</h2>
+        <div class="detalle-meta">
+          <span>LOG: <strong id="detalleFecha">--/--/----</strong></span> // 
+          <span>AUTOR: <strong id="detalleAutor">---</strong></span> // 
+          <span>CATEGORIA: <strong id="detalleCategoria">---</strong></span>
+        </div>
+
+        <!-- Marco estilo Pantalla CRT -->
+        <div class="pantalla-crt">
+          <img id="detalleImagen" src="" alt="Captura temática">
+        </div>
+
+        <div class="detalle-cuerpo" id="detalleContenido">
+          <!-- Texto extendido inyectado dinámicamente -->
+        </div>
+
+        <div class="barra-acciones-detalle">
+          <button class="btn-retro btn-peligro" id="btnDetalleFavorito">♥ AGREGAR A FAVORITOS</button>
+          <button class="btn-retro btn-primario" id="btnDetalleContacto">✉ CONTACTAR AL AUTOR</button>
+        </div>
+      </article>
+    </section>
+
+    <!-- SECCIÓN 4: FORMULARIO DE CONTACTO -->
+    <section id="vistaContacto" class="vista-seccion">
+      <div class="contacto-wrapper">
+        <h3 class="titulo-seccion">&gt; BUZON DE TRANSMISION Y CONTACTO</h3>
+        
+        <form class="formulario-retro" id="formContacto" novalidate>
+          <div class="campo-grupo">
+            <label for="inputNombre">&gt; NOMBRE_COMPLETO *</label>
+            <input type="text" id="inputNombre" placeholder="Tu nombre..." required>
+            <span class="error-texto" id="errorNombre">El nombre es requerido.</span>
+          </div>
+
+          <div class="campo-grupo">
+            <label for="inputEmail">&gt; CORREO_ELECTRONICO *</label>
+            <input type="email" id="inputEmail" placeholder="correo@dominio.com" required>
+            <span class="error-texto" id="errorEmail">Ingresa un correo electrónico válido.</span>
+          </div>
+
+          <div class="campo-grupo">
+            <label for="inputMensaje">&gt; MENSAJE *</label>
+            <textarea id="inputMensaje" rows="5" placeholder="Escribe tu mensaje o sugerencia técnica..." required></textarea>
+            <span class="error-texto" id="errorMensaje">El mensaje no puede estar vacío.</span>
+          </div>
+
+          <button type="submit" class="btn-retro btn-exito btn-block">[ ENVIAR MENSAJE ]</button>
+
+          <!-- Cuadro de Estado / Retroalimentación -->
+          <div class="consola-estado" id="consolaEstado">
+            &gt;&gt; ESTADO 200: MENSAJE TRANSMITIDO CON EXITO!
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= VENTANA MODAL (MINI CRUD: CREAR NOTICIA) ================= -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-caja">
+      <div class="modal-header">
+        <span class="modal-titulo">&gt; MODAL: REGISTRAR NUEVA NOTICIA</span>
+        <button class="btn-cerrar-modal" id="btnCerrarModal">X</button>
+      </div>
+
+      <form id="formCrearNoticia" class="modal-body" novalidate>
+        <div class="campo-grupo">
+          <label for="modalTitulo">TITULO DE LA NOTICIA *</label>
+          <input type="text" id="modalTitulo" placeholder="Ej. Lanzamiento de arquitectura RISC-V..." required>
+        </div>
+
+        <div class="campo-grupo">
+          <label for="modalCategoria">CATEGORIA *</label>
+          <select id="modalCategoria" required>
+            <option value="Hardware">Hardware</option>
+            <option value="Software">Software</option>
+            <option value="Servidores">Servidores</option>
+          </select>
+        </div>
+
+        <div class="campo-grupo">
+          <label for="modalImagen">URL DE IMAGEN (OPCIONAL - TIENE FALLBACK)</label>
+          <input type="url" id="modalImagen" placeholder="https://ejemplo.com/imagen.jpg">
+        </div>
+
+        <div class="campo-grupo">
+          <label for="modalDescripcion">RESUMEN CORTO (PARA TARJETA) *</label>
+          <input type="text" id="modalDescripcion" placeholder="Descripción breve de 1 o 2 líneas..." required>
+        </div>
+
+        <div class="campo-grupo">
+          <label for="modalContenido">CONTENIDO COMPLETO (VISTA DETALLE) *</label>
+          <textarea id="modalContenido" rows="4" placeholder="Cuerpo detallado de la noticia..." required></textarea>
+        </div>
+
+        <div class="modal-acciones">
+          <button type="submit" class="btn-retro btn-exito">[✓] GUARDAR NOTICIA</button>
+          <button type="button" class="btn-retro btn-secundario" id="btnCancelarModal">[ESC] CANCELAR</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= PIE DE PÁGINA ================= -->
+  <footer class="footer-retro">
+    <p>© 2026 BYTE_NEWS 8b • DESARROLLO FRONT-END • POLITÉCNICO GRANCOLOMBIANO</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
