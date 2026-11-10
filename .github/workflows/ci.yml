@@ -1,0 +1,23 @@
+name: CI Byte News Docker
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  docker-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar archivo .env
+        run: cp .env.example .env
+
+      - name: Validar archivo docker-compose
+        run: docker compose config
+
+      - name: Construir imagenes de contenedores
+        run: docker compose build

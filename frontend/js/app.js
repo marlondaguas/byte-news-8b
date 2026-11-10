@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const consolaEstado = document.getElementById('consolaEstado');
 
   // ========================================================================
-  // 3. INICIALIZACIÓN Y CARGA DE DATOS
+  // 3. INICIALIZACIÓN Y CARGA DE DATOS (CONECTADO A API DOCKER)
   // ========================================================================
   async function inicializarApp() {
     configurarTema();
@@ -69,28 +69,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Carga noticias desde localStorage si existen; si no, realiza fetch a noticias.json
+   * Carga las noticias haciendo una petición HTTP GET a la API en Docker
    */
   async function cargarNoticias() {
-    const noticiasLocales = localStorage.getItem(STORAGE_NOTICIAS_KEY);
-
-    if (noticiasLocales) {
-      noticias = JSON.parse(noticiasLocales);
-    } else {
-      try {
-        const respuesta = await fetch('data/noticias.json');
-        if (!respuesta.ok) throw new Error('No se pudo cargar noticias.json');
-        noticias = await respuesta.json();
-        guardarNoticiasEnStorage();
-      } catch (error) {
-        console.error('Error al inicializar noticias:', error);
-        noticias = [];
-      }
+    try {
+      const respuesta = await fetch('/api/noticias');
+      if (!respuesta.ok) throw new Error('Error al conectar con la API de noticias');
+      noticias = await respuesta.json();
+    } catch (error) {
+      console.error('Error al obtener noticias de la API:', error);
+      noticias = [];
     }
-  }
-
-  function guardarNoticiasEnStorage() {
-    localStorage.setItem(STORAGE_NOTICIAS_KEY, JSON.stringify(noticias));
   }
 
   // ========================================================================
@@ -192,15 +181,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ========================================================================
-  // 7. GESTIÓN BÁSICA DE NOTICIAS (MINI CRUD: CREAR Y ELIMINAR)
+  // 7. GESTIÓN BÁSICA DE NOTICIAS (MINI CRUD CON API EN DOCKER)
   // ========================================================================
   // Abrir y Cerrar Modal
   btnAbrirModal.addEventListener('click', () => modalBackdrop.classList.add('open'));
   btnCerrarModal.addEventListener('click', () => modalBackdrop.classList.remove('open'));
   btnCancelarModal.addEventListener('click', () => modalBackdrop.classList.remove('open'));
 
-  // CREAR NOTICIA
-  formCrearNoticia.addEventListener('submit', (e) => {
+  // CREAR NOTICIA (Envía los datos con POST a la API)
+  formCrearNoticia.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const titulo = document.getElementById('modalTitulo').value.trim();
@@ -215,40 +204,63 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const nuevaNoticia = {
-      id: Date.now(), // Identificador numérico único
       titulo,
       categoria,
       descripcionCorta,
       contenido,
       imagen: imagen !== '' ? imagen : IMAGEN_FALLBACK,
-      fecha: new Date().toLocaleDateString('es-CO'),
       autor: 'Marlon de Aguas'
     };
 
-    noticias.unshift(nuevaNoticia); // Insertar al inicio
-    guardarNoticiasEnStorage();
-    renderizarVistas();
+    try {
+      // Envío de ida hacia el Contenedor Backend
+      const respuesta = await fetch('/api/noticias', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(nuevaNoticia)
+      });
 
-    formCrearNoticia.reset();
-    modalBackdrop.classList.remove('open');
-    alert('Noticia publicada exitosamente en el catálogo.');
+      if (respuesta.ok) {
+        // Petición de vuelta: volvemos a pedir la lista actualizada a la API
+        await cargarNoticias();
+        renderizarVistas();
+
+        formCrearNoticia.reset();
+        modalBackdrop.classList.remove('open');
+        alert('Noticia publicada exitosamente en el backend de Docker.');
+      } else {
+        alert('Ocurrió un error al guardar la noticia en la API.');
+      }
+    } catch (error) {
+      console.error('Error enviando la noticia a la API:', error);
+      alert('No se pudo conectar con el servidor backend.');
+    }
   });
 
-  // ELIMINAR NOTICIA (Delegación de eventos en el Catálogo)
-  gridCatalogo.addEventListener('click', (e) => {
+  // ELIMINAR NOTICIA (Eliminación enviada a la API)
+  gridCatalogo.addEventListener('click', async (e) => {
     if (e.target.classList.contains('btn-borrar-noticia')) {
       const id = Number(e.target.getAttribute('data-id'));
       const confirmar = confirm('¿Deseas eliminar permanentemente esta noticia del catálogo?');
 
       if (confirmar) {
-        noticias = noticias.filter(n => n.id !== id);
-        // También remover de favoritos si estaba incluida
-        favoritos = favoritos.filter(favId => favId !== id);
-        localStorage.setItem('app-favoritos', JSON.stringify(favoritos));
-        
-        guardarNoticiasEnStorage();
-        actualizarContadorFavoritos();
-        renderizarVistas();
+        try {
+          const respuesta = await fetch(`/api/noticias/${id}`, {
+            method: 'DELETE'
+          });
+
+          if (respuesta.ok) {
+            // Remover de la lista local de favoritos si estaba incluida
+            favoritos = favoritos.filter(favId => favId !== id);
+            localStorage.setItem('app-favoritos', JSON.stringify(favoritos));
+            actualizarContadorFavoritos();
+
+            await cargarNoticias();
+            renderizarVistas();
+          }
+        } catch (error) {
+          console.error('Error al eliminar la noticia en la API:', error);
+        }
       }
     }
   });
