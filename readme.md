@@ -1,60 +1,88 @@
-# BYTE_NEWS 8b
+# 📰 Byte News 8b - Plataforma de Noticias (Docker & CI)
 
-Aplicativo web de noticias sobre tecnología con temática retro 8-bit / neobrutalista, desarrollado para el módulo de **Frontend** en el **Politécnico Grancolombiano**.
+Proyecto académico para el módulo **Énfasis Profesional I (Integración Continua)** del **Politécnico Grancolombiano**.
 
----
-
-## 📌 Descripción
-
-BYTE_NEWS 8b es un portal informativo desarrollado con tecnologías web nativas (HTML5, CSS y JavaScript Vanilla). La aplicación consume y gestiona publicaciones desde un archivo local JSON, permitiendo interactuar con el contenido sin depender de librerías ni frameworks externos.
+Esta aplicación consiste en una plataforma web de noticias con estética 8-bit desacoplada en dos contenedores Docker independientes, orquestados mediante **Docker Compose** y validados con un pipeline de Integración Continua en **GitHub Actions**.
 
 ---
 
-## ⚙️ Funcionalidades
+## 🏗️ Arquitectura de la Solución
 
-* **Catálogo dinámico:** Carga de noticias desde `data/noticias.json` con filtros por categoría.
-* **Mini CRUD:** Creación de noticias mediante ventana modal y eliminación directa desde la tarjeta, con actualización inmediata en pantalla.
-* **Favoritos con persistencia:** Opción para guardar o quitar noticias favoritas usando `localStorage`.
-* **Modo Claro / Oscuro:** Interruptor Sol/Luna con persistencia de preferencia en el navegador.
-* **Vista de detalle:** Pantalla completa para leer el artículo seleccionado.
-* **Formulario de contacto:** Validación de campos y formato de correo electrónico mediante expresiones regulares (`Regex`).
-* **Diseño responsivo:** Adaptado para pantallas de computador y dispositivos móviles usando CSS Grid y Flexbox.
+El proyecto utiliza una arquitectura cliente/servidor aislada en dos contenedores dentro de una red interna bridge (`byte_news_net`):
 
----
+1. **Servidor Web / Frontend (`byte_news_web`):**
+   * **Imagen Base:** `nginx:1.27-alpine`
+   * **Puerto Expuesto:** `8080` (host) -> `80` (contenedor)
+   * **Rol:** Sirve la interfaz gráfica en HTML/CSS/JS y actúa como Proxy Inverso redirigiendo las llamadas `/api/` hacia el contenedor de la API.
 
-## 📂 Estructura del Proyecto
+2. **API REST / Backend (`byte_news_api`):**
+   * **Imagen Base:** `node:20.18-alpine`
+   * **Puerto Interno:** `3000`
+   * **Rol:** Procesa las noticias enviadas y las persiste en el archivo `/app/data/noticias.json`.
 
-```text
-byte-news-8b/
-├── index.html          # Estructura principal
-├── README.md           # Documentación del proyecto
-├── css/
-│   └── styles.css      # Estilos visuales y modo claro/oscuro
-├── js/
-│   └── app.js          # Lógica, eventos y persistencia local
-└── data/
-    └── noticias.json   # Datos de los artículos
-```
+3. **Persistencia (Volumen Docker):**
+   * **Volumen:** `byte_news_data` montado en `/app/data` para garantizar la conservación de la información al reiniciar los contenedores.
+
+4. **Comunicación en Red Interna:**
+   * La comunicación entre servicios se realiza utilizando la resolución DNS interna de Docker a través de la URL `http://api:3000`, evitando el uso de `localhost` o direcciones IP fijas.
 
 ---
 
-## 🚀 Cómo ejecutar el proyecto
+## 🚀 Requisitos Previos
 
-1. Clona el repositorio en tu computador:
-   ```bash
-   git clone https://github.com/marlondaguas/byte-news-8b.git
-   ```
-2. Entra a la carpeta del proyecto:
-   ```bash
-   cd byte-news-8b
-   ```
-3. Ábrelo en Visual Studio Code y ejecútalo con **Live Server** (clic derecho sobre `index.html` > *Open with Live Server*).  
-   *Nota: Se requiere un servidor local para que el navegador permita la carga del archivo `data/noticias.json` mediante `fetch`.*
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado y en ejecución.
+* [Git](https://git-scm.com/) para clonar el repositorio.
 
 ---
 
-## 👤 Autor
+## 🛠️ Instrucciones de Despliegue Local
 
-* **Estudiante:** Marlon de Aguas
-* **Módulo:** Frontend
-* **Institución:** Politécnico Grancolombiano (2026)
+### 1. Clonar el repositorio
+git clone https://github.com/marlondaguas/byte-news-8b.git
+cd byte-news-8b
+
+### 2. Configurar variables de entorno
+Crea una copia del archivo .env.example:
+cp .env.example .env
+
+### 3. Construir las imágenes Docker
+docker compose build
+
+### 4. Levantar los contenedores en segundo plano
+docker compose up -d
+
+### 5. Acceder a la aplicación
+Abre tu navegador e ingresa a:
+👉 http://localhost:8080
+
+---
+
+## 🔍 Comandos Útiles de Verificación
+
+* **Verificar contenedores activos:**
+  docker ps
+
+* **Inspeccionar la red interna de Docker:**
+  docker network inspect byte-news-8b_byte_news_net
+
+* **Revisar logs de la API Backend:**
+  docker compose logs api
+
+* **Verificar noticias guardadas dentro del volumen:**
+  docker compose exec api cat /app/data/noticias.json
+
+* **Detener y apagar los contenedores:**
+  docker compose down
+
+---
+
+## ⚙️ Integración Continua (CI)
+
+El proyecto cuenta con un workflow de **GitHub Actions** en `.github/workflows/ci.yml` que valida automáticamente en cada `push` o `pull_request` a la rama principal:
+* La correcta sintaxis de `docker-compose.yml`.
+* La compilación limpia de las imágenes Docker sin errores de dependencias.
+
+---
+
+## ✒️ Autor
+* **Marlon de Aguas** - Politécnico Grancolombiano (2026)
