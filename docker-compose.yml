@@ -3,7 +3,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: byte_news_web
     restart: unless-stopped
     ports:
       - "${PORT_WEB}:80"
@@ -16,7 +15,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: byte_news_api
     restart: unless-stopped
     environment:
       - PORT=${PORT_API}
