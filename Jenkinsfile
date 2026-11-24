@@ -28,9 +28,9 @@ pipeline {
                     docker compose up -d
                     sleep 5
                     echo "Verificando servidor Web (Nginx)..."
-                    docker compose exec -T web wget -qO- http://localhost:80 > /dev/null
+                    docker compose exec -T web wget -qO- http://127.0.0.1:80 > /dev/null
                     echo "Verificando comunicacion Web -> API (/api/noticias)..."
-                    RESPUESTA=$(docker compose exec -T web wget -qO- http://localhost:80/api/noticias)
+                    RESPUESTA=$(docker compose exec -T web wget -qO- http://127.0.0.1:80/api/noticias)
                     echo "Respuesta de la API recibida a traves de Nginx: $RESPUESTA"
                     echo "$RESPUESTA" | grep -q "\\[" || (echo "ERROR: Fallo la comunicacion entre contenedores" && exit 1)
                 '''
